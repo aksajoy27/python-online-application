@@ -1,0 +1,73 @@
+# docker-compose.yaml
+
+version: '3.8'
+services:
+  signup-login-service:
+    build:
+      context: ./signup-login-service
+      dockerfile: Dockerfile
+    ports:
+      - "9010:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/boutique
+  product-catalog-service:
+    build:
+      context: ./product-catalog-service
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/boutique
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/boutique
+  checkout-service:
+    build:
+      context: ./checkout-service
+      dockerfile: Dockerfile
+    ports:
+      - "9090:80"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/boutique
+      - CART_SERVICE_URL=http://cart-service:8080
+      - PRODUCT_CATALOG_URL=http://product-catalog-service:8080  
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@localhost.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    # volumes:
+    #  - ./postgres_data/admin/:/var/lib/pgadmin
+    ports:
+      - "5005:80"
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: boutique
+    volumes:
+      - ./postgres_data/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
