@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signup-login-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signup-login-service
+  template:
+    metadata:
+      labels:
+        app: signup-login-service
+    spec:
+      containers:
+      - name: signup-login-service
+        image: signup-login-service
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://postgres:postgres@db:5432/boutique"
