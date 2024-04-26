@@ -1,0 +1,15 @@
+FROM python:3.9
+
+WORKDIR /app
+# Copy the current directory contents into the container at /app
+#COPY . /app
+
+COPY requirements.txt .
+
+#COPY requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
